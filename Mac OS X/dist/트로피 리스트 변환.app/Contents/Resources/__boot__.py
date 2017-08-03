@@ -126,7 +126,7 @@ def _run():
     exec(compile(source, script, 'exec'), globals(), globals())
 
 
-DEFAULT_SCRIPT='/Users/m/Documents/트로피 리스트 변환 자동화/Mac OS X/TrophyListChanger.py'
+DEFAULT_SCRIPT='/Users/m/Documents/트로피 리스트 변환 자동화/Mac OS X/TrophyListChanger_OSX.py'
 SCRIPT_MAP={}
 try:
     _run()

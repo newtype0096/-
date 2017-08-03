@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>트로피 리스트 변환</string>
 	<key>CFBundleGetInfoString</key>
-	<string>트로피 리스트 변환 자동화 1.0.1</string>
+	<string>트로피 리스트 변환 자동화 1.0.3</string>
 	<key>CFBundleIconFile</key>
 	<string>Logo.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -21,11 +21,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.1</string>
+	<string>1.0.3</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1.0.1</string>
+	<string>1.0.3</string>
 	<key>LSHasLocalizedDisplayName</key>
 	<false/>
 	<key>NSAppleScriptEnabled</key>

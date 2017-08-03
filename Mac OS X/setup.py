@@ -7,21 +7,21 @@ Usage:
 
 from setuptools import setup
 
-APP = ['TrophyListChanger.py']
+APP = ['TrophyListChanger_OSX.py']
 APP_NAME = '트로피 리스트 변환'
 DATA_FILES = []
 OPTIONS = {
     'argv_emulation': False,
     'iconfile': 'Logo.icns',
-    'includes': ['resource_rc'],
+    'includes': ['resource_rc', 'pyperclip'],
     'strip': True,
     'plist': {
         'CFBundleName': APP_NAME,
 		'CFBundleDisplayName': APP_NAME,
-		'CFBundleGetInfoString': "트로피 리스트 변환 자동화 1.0.1",
+		'CFBundleGetInfoString': "트로피 리스트 변환 자동화 1.0.3",
 		'CFBundleIdentifier': "M-AHHH",
-		'CFBundleVersion': "1.0.1",
-		'CFBundleShortVersionString': "1.0.1",
+		'CFBundleVersion': "1.0.3",
+		'CFBundleShortVersionString': "1.0.3",
 		'NSHumanReadableCopyright': "Copyright (C) 2017, M-AHHH, All Rights Reserved"
     }
 }

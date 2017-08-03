@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --paths C:\Users\IEUser\AppData\Local\Programs\Python\Python35\Lib\site-packages\PyQt5\Qt\bin --icon C:\Users\IEUser\Desktop\Logo.ico TrophyListChanger.py
+pyinstaller --onefile --noconsole --paths C:\Users\IEUser\AppData\Local\Programs\Python\Python35\Lib\site-packages\PyQt5\Qt\bin --icon C:\Users\IEUser\Desktop\Logo.ico TrophyListChanger_Win.py

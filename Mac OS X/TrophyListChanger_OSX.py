@@ -10,8 +10,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.Qt import QApplication, QClipboard
 from PyQt5.QtWidgets import QFileDialog
 from bs4 import BeautifulSoup
-import multiprocessing
 import requests
+import multiprocessing
+
+import os
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -160,217 +162,256 @@ class Ui_Dialog(object):
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
 
-    # Variable
-    platinum_trophy = '<img id="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" src="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" width="17" height="17">'
-    gold_trophy = '<img id="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" src="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" width="17" height="17">'
-    silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="17" height="17">'
-    bronze_trophy = '<img id="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" src="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" width="17" height="17">'
-    hidden_trophy = '<img id="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" src="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" width="17" height="17">'
-    space = '&nbsp;'
-
-    hidden_name_list = []
-    source_list = []
-
-    trophy_count = ''
-
-    trophy_info_tag = ''
-
-    process1 = []
-    process2 = []
-
-    dir = ''
-    #
-
     # slot
     def pushButton_SaveImage_Clicked(self):
         self.textBrowser.clear()
-        self.dir = ''
-        self.dir = str(QFileDialog.getExistingDirectory())
+        self.dir_path = '' # 저장 경로
+        self.dir_path = str(QFileDialog.getExistingDirectory())
 
-        if self.dir != '':
-            self.dir += '/'
-            # self.textBrowser.append(self.dir + " 경로에 다운로드")
-
+        if self.dir_path != '':
             try:
+                self.dir_path = self.dir_path + '/'
                 main_url = self.lineEdit_URL.text()
+
                 req = requests.get(main_url)
                 html = req.text
                 soup = BeautifulSoup(html, 'html.parser')
+
+                # DLC가 없는 상황을 대비한 메인이미지 추출
                 trophy_main_img_holder = soup.find("div", "game-image-holder")
                 trophy_main_img = trophy_main_img_holder.a.get('href')
+
+                trophy_main_img_list = []
+                trophy_main_img_list.append(trophy_main_img)
+
+                # DLC가 있는 상황의 메인 + 모든 이미지
                 trophy_img = soup.find_all("picture")
 
-                for picture_tag in trophy_img:
-                    p = multiprocessing.Process(target=self.SaveImage2, args=(picture_tag,))
-                    self.process2.append(p)
-                    p.start()
+                # 멀티 프로세싱 OSX
+                q = multiprocessing.Queue() # 큐 생성
 
-                p = multiprocessing.Process(target=self.SaveImage1, args=(trophy_main_img,))
-                self.process1.append(p)
-                p.start()
+                for picture_tag in trophy_img:  # 트로피 이미지
+                    img_tag = picture_tag.find_all("img")
+                    for img in img_tag:
+                        src = img.get("src")
+                        IsTrophy = True
+                        proc = multiprocessing.Process(target=self.Download_Image, args=(src, q, IsTrophy))
+                        proc.start() # 시작
 
-                self.textBrowser.append("이미지 태그 추출 완료")
-                self.textBrowser.append(self.dir + ' 경로에 모든 이미지 백그라운드 다운로드 중 ...')
+                IsTrophy = False # 트로피 메인 이미지
+                proc = multiprocessing.Process(target=self.Download_Image, args=(trophy_main_img, q, IsTrophy))
+                proc.start()  # 시작
+
+                qcount = len(trophy_img) + len(trophy_main_img_list)
+
+                for filename in range(qcount):
+                    filename = q.get()
+                    self.textBrowser.append(filename + " 다운로드 완료")
+
             except:
-                self.textBrowser.append("올바른 링크를 입력해주세요.")
+                self.textBrowser.setText("올바른 링크를 입력해주세요.")
 
     def pushButton_html_Clicked(self):
-            self.get_trophy_info_tag(self.lineEdit_URL_2.text()+'?lang=ko&secret=hide')
-            self.get_trophy_tag(self.lineEdit_URL_2.text()+'?lang=ko')
-    #
+        platinum_trophy = '<img id="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" src="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" width="17" height="17">'
+        gold_trophy = '<img id="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" src="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" width="17" height="17">'
+        silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="17" height="17">'
+        bronze_trophy = '<img id="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" src="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" width="17" height="17">'
+        hidden_trophy = '<img id="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" src="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" width="17" height="17">'
+        space = '&nbsp;'
 
-    # function
-    def SaveImage1(self, url):
-        self.process1 = []
-        filename = url.split("/")[-1]
-        r = requests.get(url)
-        with open(self.dir+filename, 'wb') as f:
-            f.write(r.content)
-            # self.textBrowser.append(QDir.currentPath() + '/' + filename + " 다운로드 완료")
-
-
-    def SaveImage2(self, _img):
-        self.process2 = []
-        # for picture_tag in img:  # 트로피 이미지
-            # img_tag = picture_tag.find_all("img")
-        img_tag = _img.find_all("img")
-        for img in img_tag:
-            url = img.get("src")
-            filename = url.split("/")[-1]
-            r = requests.get(url)
-            with open(self.dir+filename, 'wb') as f:
-                f.write(r.content)
-                # self.textBrowser.append(QDir.currentPath() + '/' + filename + " 다운로드 완료")
-
-
-    def get_trophy_info_tag(self, url):
-        self.hidden_name_list = []
-        self.source_list = []
         try:
-            req = requests.get(url) # PSN Profiles 링크
+
+            main_url = self.lineEdit_URL_2.text() + '?lang=ko'
+            hidden_url = main_url + '&secret=hide'
+
+            req = requests.get(main_url)
             html = req.text
             soup = BeautifulSoup(html, 'html.parser')
 
-            # 게임 제목
-            title_name = soup.find("span", "breadcrumb-arrow").next_sibling
+            # 게임 제목 # 성공
+            title_name = title_name = soup.find("span", "breadcrumb-arrow").next_sibling
 
-            # 트로피 갯수
-            platinum = soup.find("li", "icon-sprite platinum").get_text()
-            gold = soup.find("li", "icon-sprite gold").get_text()
-            silver = soup.find("li", "icon-sprite silver").get_text()
-            bronze = soup.find("li", "icon-sprite bronze").get_text()
-            hidden = 0
+            # 총 트로피 갯수 # 성공
+            all_trophy_count = 0  # 총 트로피 갯수 0 으로 초기화
 
-            # 총 트로피 갯수
-            self.trophy_count = soup.find("span", "small-info floatr").b.get_text()
+            trophy_count = soup.find_all("span", "small-info floatr")
+            for trophies in trophy_count:
+                aaa = int(trophies.b.get_text())  # 태그 별 트로피 갯수 비교 후 가장 큰 값을 총 트로피 갯수로 저장
+                if all_trophy_count < aaa:
+                    all_trophy_count = aaa
 
-            # 숨겨진 트로피 조사
-            hidden_trophy_table = soup.find_all("td", style="width: 100%;")
+            # 개별 트로피 갯수 # 성공
+            platinum_trophy_count = soup.find("li", "icon-sprite platinum").get_text()  # 플래티넘은 어차피 1개이기 때문에 상관없음 # 플래티넘 트로피 성공
 
-            for td_tag in hidden_trophy_table:
-                a_tag = td_tag.find_all('a')
-                for name in a_tag:
-                    self.hidden_name_list.append(name.string)
+            gold_trophy_count = 0  # 골드 트로피 갯수 0으로 초기화 # 골드 트로피 성공
+            gold = soup.find_all("li", "icon-sprite gold")
+            for gold_trophies in gold:
+                aaa = int(gold_trophies.get_text())
+                if gold_trophy_count < aaa:
+                    gold_trophy_count = aaa
 
-            if len(self.hidden_name_list) > int(self.trophy_count):  # 총 트로피 수 보다 가져온 리스트 수가 더 많을 시 첫번째 인덱스 삭제
-                del self.hidden_name_list[0]
+            silver_trophy_count = 0  # 실버 트로피 갯수 0으로 초기화 # 실버 트로피 성공
+            silver = soup.find_all("li", "icon-sprite silver")
+            for silver_trophies in silver:
+                aaa = int(silver_trophies.get_text())
+                if silver_trophy_count < aaa:
+                    silver_trophy_count = aaa
 
-            for match in self.hidden_name_list:
-                if match == 'Secret Trophy':
-                    hidden += 1
+            bronze_trophy_count = 0  # 브론즈 트로피 갯수 0으로 초기화 # 브론즈 트로피 성공
+            bronze = soup.find_all("li", "icon-sprite bronze")
+            for bronze_trophies in bronze:
+                aaa = int(bronze_trophies.get_text())
+                if bronze_trophy_count < aaa:
+                    bronze_trophy_count = aaa
 
-            html_doc = self.plainTextEdit_NaverTag.toPlainText() # 네이버에 등록한 태그
-            naver_tag = BeautifulSoup(html_doc, 'html.parser')
-            list_source = naver_tag.find_all("img")
+            hidden_trophy_count = 0  # 히든 트로피 갯수 0으로 초기화 # 히든 트로피 성공
 
-            for source in list_source:
-              self.source_list.append(str(source)) # 네이버에 등록한 태그 리스트에 저장
+            hidden_req = requests.get(hidden_url)  # 히든 트로피만 url 따로 설정
+            hidden_html = hidden_req.text
+            hidden_soup = BeautifulSoup(hidden_html, 'html.parser')
 
-            trophy_info_img = self.source_list[-1] # 마지막에 등록된 이미지는 메인 이미지로 저장
-            del self.source_list[-1] # 메인 이미지 리스트에서 삭제
+            hidden_trophy_table = hidden_soup.find_all("td", style="width: 100%;")
 
-            self.trophy_info_tag = (
-                '<center>' + trophy_info_img + '<br><br>' +
-                '<span style="font-family: Verdana; font-size: 14pt;"><b>' +
-                '<font color="#000000">' + title_name + ' 트로피 리스트' + '</span><br><br>' +
-                '<span style="font-family: Verdana; font-size: 14pt;">' +
-                '<font color="#0075c8">' + self.platinum_trophy + self.space + platinum + self.space + '</font>' +
-                '<font color="#d1b274">' + self.gold_trophy + self.space + gold + self.space + '</font>' +
-                '<font color="#acacac">' + self.silver_trophy + self.space + silver + self.space + '</font>' +
-                '<font color="#951015">' + self.bronze_trophy + self.space + bronze + self.space + '</font>' +
-                '<font color="#000000">' + self.hidden_trophy + self.space + str(hidden) + '</font>' +
-                '</b></span>' + '</center>' + '<br>'
-            )
-            # self.plainTextEdit_NaverTag.setPlainText(self.trophy_info_tag)
-        except:
-            self.plainTextEdit_NaverTag.setPlainText("올바른 링크와 태그를 입력해주세요.")
-    def get_trophy_tag(self, url):
-        name_list = []
-        content_list = []
-        grade_list = []
-        trophy_tag = ''
-        try:
-            req = requests.get(url) # PSN Profiles 링크
-            html = req.text
-            soup = BeautifulSoup(html, 'html.parser')
+            hidden_name_list = []
 
-            # 트로피 제목, 내용 조사
-            trophy_table = soup.find_all("td", style="width: 100%;")
-            # 트로피 등급 조사
+            hidden_count = 0
+
+            for tag in hidden_trophy_table:
+                text = tag.stripped_strings
+                for content in text:
+                    if (hidden_count % 2) == 0:  # 짝수면 트로피 이름 저장
+                        hidden_name_list.append(content)  # Secret Trophy
+
+            for match in hidden_name_list:
+                if match == 'Secret Trophy':  # 저장된 이름이 Secret Trophy면
+                    hidden_trophy_count += 1  # 갯수 1씩 증가
+
+            # 트로피 제목 트로피 내용 # 성공
+            trophy_name_list = []
+            trophy_content_list = []
+            platinum_content = ''
+
+            all_trophy_table = soup.find_all("td", style="width: 100%;")
+
+            for tag in all_trophy_table:
+                a = tag.find_all("a")
+                for text in a:
+                    name = text.get_text()
+                    trophy_name_list.append(name)
+
+            # all_count = 0 # 사용 중지
+            find_platinum_content = 0
+
+            for tag in all_trophy_table:
+                text = tag.find_all("br")
+                for content in text:
+                    trophy_content_list.append(content.next_sibling)
+
+            for tag in all_trophy_table:  # 플래티넘 내용 가져오기
+                text = tag.stripped_strings
+                for content in text:
+                    if find_platinum_content == 1:
+                        platinum_content = content
+                        break  # 플래티넘 내용만 얻은 뒤 탈출
+                    find_platinum_content += 1
+
+                    # if (all_count % 2) == 0: # 짝수는 이름, 홀수는 내용 판별
+                    #     pass
+                    #     # name_list.append(content) # 트로피 이름 # 사용 중지
+                    # else:
+                    #     content_list.append(content) # 트로피 내용 # 사용 중지
+                    # all_count+=1 # 사용 중지
+                break  # 탈출
+
+            trophy_content_list[0] = platinum_content  # None 값을 플래티넘 내용으로 변경
+
+            # 트로피 등급 # 성공
+            grade_list = []
             trophy_grade = soup.find_all("span", "separator left")
-
-            for td_tag in trophy_table:  # 트로피 제목
-                a_tag = td_tag.find_all("a")
-                for name in a_tag:
-                    name_list.append(name.string)
-
-            if len(name_list) > int(self.trophy_count):  # 총 트로피 수 보다 가져온 리스트 수가 더 많을 시 첫번째 인덱스 삭제
-                del name_list[0]
-
-            for br_tag in trophy_table:  # 트로피 내용
-                content_list.append(br_tag.br.next_sibling)
-
-            if len(content_list) > int(self.trophy_count):  # 총 트로피 수 보다 가져온 리스트 수가 더 많을 시 첫번째 인덱스 삭제
-                del content_list[0]
 
             for img_tag in trophy_grade:  # 트로피 등급
                 trophy = img_tag.find_all("img")
                 for grade in trophy:
                     grade_list.append(grade.get("title"))
 
-            list_count = 0
+            # 네이버 태그
+            naver_tag_list = []  # 네이버 태그 리스트
+            naver_tag_img_list = []  # 이미지 태그 개별 저장
+            naver_tag = self.plainTextEdit_NaverTag.toPlainText()
 
-            while list_count < int(self.trophy_count):
+            naver_tag_list = BeautifulSoup(naver_tag, 'html.parser').find_all("img")
+
+            for tag in naver_tag_list:
+                naver_tag_img_list.append(str(tag))
+
+            trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
+            del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
+
+            trophy_info_tag = (
+                '<center>' + trophy_main_img + '<br><br>' +
+                '<span style="font-family: Verdana; font-size: 14pt;"><b>' +
+                '<font color="#000000">' + title_name + ' 트로피 리스트' + '</span><br><br>' +
+                '<span style="font-family: Verdana; font-size: 14pt;">' +
+                '<font color="#0075c8">' + platinum_trophy + space + str(platinum_trophy_count) + space + '</font>' +
+                '<font color="#d1b274">' + gold_trophy + space + str(gold_trophy_count) + space + '</font>' +
+                '<font color="#acacac">' + silver_trophy + space + str(silver_trophy_count) + space + '</font>' +
+                '<font color="#951015">' + bronze_trophy + space + str(bronze_trophy_count) + space + '</font>' +
+                '<font color="#000000">' + hidden_trophy + space + str(hidden_trophy_count) + '</font>' +
+                '</b></span>' + '</center>' + '<br>'
+            )
+            # 트로피 등급 확인 후 태그 선정
+            list_count = 0
+            trophy_tag = ''
+            while list_count < int(all_trophy_count):
                 grade = ''
                 hidden = ''
 
                 if grade_list[list_count] == 'Platinum':
-                    grade = self.platinum_trophy
+                    grade = platinum_trophy
                 elif grade_list[list_count] == 'Gold':
-                    grade = self.gold_trophy
+                    grade = gold_trophy
                 elif grade_list[list_count] == 'Silver':
-                    grade = self.silver_trophy
+                    grade = silver_trophy
                 elif grade_list[list_count] == 'Bronze':
-                    grade = self.bronze_trophy
+                    grade = bronze_trophy
 
-                if self.hidden_name_list[list_count] == 'Secret Trophy':
-                    hidden = self.hidden_trophy
+                if hidden_name_list[list_count] == 'Secret Trophy':
+                    hidden = hidden_trophy
 
                 trophy_tag += (
                     '<span style="font-family: Verdana; font-size: 9pt;">' +
-                    self.source_list[list_count] + self.space +
-                    '<b>' + name_list[list_count] + '</b>' + self.space + grade + hidden + '<br>' +
-                    content_list[list_count] + '</span><br><br>'
+                    naver_tag_img_list[list_count] + space +
+                    '<b>' + trophy_name_list[list_count] + '</b>' + space + grade + hidden + '<br>' +
+                    trophy_content_list[list_count] + '</span><br><br>'
                 )
                 list_count += 1
-            full_tag = self.trophy_info_tag + trophy_tag
+
+            full_tag = trophy_info_tag + trophy_tag
             clipboard = QApplication.clipboard()
             clipboard.setText(full_tag)
-            # pyperclip.copy(full_tag)
-            # self.plainTextEdit_NaverTag.setPlainText(pyperclip.paste())
-            self.plainTextEdit_NaverTag.setPlainText("변환이 완료되어 클립보드에 복사되었습니다. 태그를 붙여넣기 하세요.")
+
+            self.plainTextEdit_NaverTag.setPlainText("변환이 완료되어 클립보드에 복사되었습니다.")
         except:
-            self.plainTextEdit_NaverTag.setPlainText("올바른 링크와 태그를 입력해주세요.")
+            self.plainTextEdit_NaverTag.setPlainText("올바른 링크와 태그를 입력하세요.")
+    #
+
+    # function
+    def set_Queue(self, q, filename):
+            q.put(filename)
+
+    def Download_Image(self, src, q, IsTrophy):
+        if IsTrophy:
+            filename = src.split("/")[-1]
+            r = requests.get(src)
+            with open(self.dir_path+filename, 'wb') as f:
+                f.write(r.content)
+                self.set_Queue(q, filename)
+        else:
+            filename = src.split("/")[-1]
+            r = requests.get(src)
+            with open(self.dir_path + filename, 'wb') as f:
+                f.write(r.content)
+                self.set_Queue(q, filename)
     #
 
     def retranslateUi(self, Dialog):
@@ -378,7 +419,7 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate('Dialog', 'PSTC - 트로피 리스트 html 변환 자동화'))
         self.pushButton_SaveImage.setText(_translate('Dialog', '이미지 저장'))
         self.label_URL.setText(_translate('Dialog', '아래 입력란에 PSN Profiles 링크를 입력해주세요. (예: https://psnprofiles.com/trophies/5992-무쌍스타즈)'))
-        self.label_4.setText(_translate('Dialog', '결과'))
+        self.label_4.setText(_translate('Dialog', '결과 (잠시 기다려주세요.)'))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate('Dialog', '트로피 이미지'))
         self.label_URL_2.setText(_translate('Dialog', '아래 입력란에 PSN Profiles 링크를 입력해주세요. (예: https://psnprofiles.com/trophies/5992-무쌍스타즈)'))
         self.label_3.setText(_translate('Dialog', '네이버에 등록한 이미지의 html 태그를 아래에 붙여 넣어주세요.'))
@@ -396,11 +437,12 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate('Dialog', '6. html 체크를 해제하고 "확인" 버튼을 눌러 글작성을 완료합니다.'))
         self.label_16.setText(_translate('Dialog', ''))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate('Dialog', '사용 방법'))
-        self.label_15.setText(_translate('Dialog', '1.0.3 | 앰아 (M-AHHH)'))
+        self.label_15.setText(_translate('Dialog', '1.0.4 | 앰아 (M-AHHH)'))
 
 import resource_rc
 
 if __name__ == '__main__':
+    # multiprocessing.freeze_support() # 윈도우즈용 exe 배포시 주석 해제
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()

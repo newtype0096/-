@@ -18,10 +18,10 @@ OPTIONS = {
     'plist': {
         'CFBundleName': APP_NAME,
 		'CFBundleDisplayName': APP_NAME,
-		'CFBundleGetInfoString': "트로피 리스트 변환 자동화 1.0.4",
+		'CFBundleGetInfoString': "트로피 리스트 변환 자동화 1.0.5",
 		'CFBundleIdentifier': "M-AHHH",
-		'CFBundleVersion': "1.0.4",
-		'CFBundleShortVersionString': "1.0.4",
+		'CFBundleVersion': "1.0.5",
+		'CFBundleShortVersionString': "1.0.5",
 		'NSHumanReadableCopyright': "Copyright (C) 2017, M-AHHH, All Rights Reserved"
     }
 }

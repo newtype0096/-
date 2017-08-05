@@ -7,13 +7,14 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.Qt import QApplication, QClipboard
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.Qt import QApplication, QClipboard, QWidget
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QPushButton
 from bs4 import BeautifulSoup
+from tkinter import messagebox, Toplevel
+import tkinter
 import requests
 import multiprocessing
-
-import os
+import sys
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -176,9 +177,10 @@ class Ui_Dialog(object):
                 req = requests.get(main_url)
 
                 self.textBrowser.append("링크 확인 성공...")
-                self.textBrowser.append(self.dir_path + " 경로에 모든 이미지 백그라운드에서 다운로드 시작...")
+                self.textBrowser.append(self.dir_path + " 경로에 모든 이미지가 다운로드 됩니다...")
+                self.textBrowser.append("다운로드 완료시 메세지 박스가 나타납니다.")
 
-                # 멀티 프로세싱 Win
+                # 멀티 프로세싱 Win # 원본
                 proc = multiprocessing.Process(target=self.Download_Image, args=(main_url,))
                 proc.start()
             except:
@@ -250,10 +252,10 @@ class Ui_Dialog(object):
             hidden_count = 0
 
             for tag in hidden_trophy_table:
-                text = tag.stripped_strings
-                for content in text:
-                    if (hidden_count % 2) == 0:  # 짝수면 트로피 이름 저장
-                        hidden_name_list.append(content)  # Secret Trophy
+                a = tag.find_all("a")
+                for text in a:
+                    name = text.get_text()
+                    hidden_name_list.append(name)
 
             for match in hidden_name_list:
                 if match == 'Secret Trophy':  # 저장된 이름이 Secret Trophy면
@@ -323,8 +325,9 @@ class Ui_Dialog(object):
             trophy_info_tag = (
                 '<center>' + trophy_main_img + '<br><br>' +
                 '<span style="font-family: Verdana; font-size: 14pt;"><b>' +
-                '<font color="#000000">' + title_name + ' 트로피 리스트' + '</span><br><br>' +
-                '<span style="font-family: Verdana; font-size: 14pt;">' +
+                '<font color="#000000">' + title_name + ' 트로피 리스트' + '<br>' +
+                '(' + title_name + ')' + '</font></span><br>' +
+                '<br><span style="font-family: Verdana; font-size: 14pt;">' +
                 '<font color="#0075c8">' + platinum_trophy + space + str(platinum_trophy_count) + space + '</font>' +
                 '<font color="#d1b274">' + gold_trophy + space + str(gold_trophy_count) + space + '</font>' +
                 '<font color="#acacac">' + silver_trophy + space + str(silver_trophy_count) + space + '</font>' +
@@ -370,7 +373,7 @@ class Ui_Dialog(object):
 
     # function
     def Download_Image(self, main_url):
-
+        # 원본
         req = requests.get(main_url)
         html = req.text
         soup = BeautifulSoup(html, 'html.parser')
@@ -395,7 +398,18 @@ class Ui_Dialog(object):
         r = requests.get(trophy_main_img)
         with open(self.dir_path + filename, 'wb') as f:
             f.write(r.content)
-    #
+
+        # 메세지 박스
+        app = QApplication(sys.argv)
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText("모든 이미지가 다운로드 되었습니다.")
+        msg.setWindowTitle("다운로드 완료")
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        msg.show()
+        sys.exit(app.exec_())
+        # #
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
@@ -420,13 +434,12 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate('Dialog', '6. html 체크를 해제하고 "확인" 버튼을 눌러 글작성을 완료합니다.'))
         self.label_16.setText(_translate('Dialog', ''))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate('Dialog', '사용 방법'))
-        self.label_15.setText(_translate('Dialog', '1.0.4 | 앰아 (M-AHHH)'))
+        self.label_15.setText(_translate('Dialog', '1.0.5 | 앰아 (M-AHHH)'))
 
 import resource_rc
 
 if __name__ == '__main__':
     multiprocessing.freeze_support() # 윈도우즈용 exe 배포시 주석 해제
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     Dialog = QtWidgets.QDialog()
     ui = Ui_Dialog()

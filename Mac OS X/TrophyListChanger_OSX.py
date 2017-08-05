@@ -13,8 +13,6 @@ from bs4 import BeautifulSoup
 import requests
 import multiprocessing
 
-import os
-
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName('Dialog')
@@ -277,10 +275,10 @@ class Ui_Dialog(object):
             hidden_count = 0
 
             for tag in hidden_trophy_table:
-                text = tag.stripped_strings
-                for content in text:
-                    if (hidden_count % 2) == 0:  # 짝수면 트로피 이름 저장
-                        hidden_name_list.append(content)  # Secret Trophy
+                a = tag.find_all("a")
+                for text in a:
+                    name = text.get_text()
+                    hidden_name_list.append(name)
 
             for match in hidden_name_list:
                 if match == 'Secret Trophy':  # 저장된 이름이 Secret Trophy면
@@ -350,8 +348,9 @@ class Ui_Dialog(object):
             trophy_info_tag = (
                 '<center>' + trophy_main_img + '<br><br>' +
                 '<span style="font-family: Verdana; font-size: 14pt;"><b>' +
-                '<font color="#000000">' + title_name + ' 트로피 리스트' + '</span><br><br>' +
-                '<span style="font-family: Verdana; font-size: 14pt;">' +
+                '<font color="#000000">' + title_name + ' 트로피 리스트' + '<br>' +
+                '(' + title_name + ')' + '</font></span><br>' +
+                '<br><span style="font-family: Verdana; font-size: 14pt;">' +
                 '<font color="#0075c8">' + platinum_trophy + space + str(platinum_trophy_count) + space + '</font>' +
                 '<font color="#d1b274">' + gold_trophy + space + str(gold_trophy_count) + space + '</font>' +
                 '<font color="#acacac">' + silver_trophy + space + str(silver_trophy_count) + space + '</font>' +
@@ -437,7 +436,7 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate('Dialog', '6. html 체크를 해제하고 "확인" 버튼을 눌러 글작성을 완료합니다.'))
         self.label_16.setText(_translate('Dialog', ''))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate('Dialog', '사용 방법'))
-        self.label_15.setText(_translate('Dialog', '1.0.4 | 앰아 (M-AHHH)'))
+        self.label_15.setText(_translate('Dialog', '1.0.5 | 앰아 (M-AHHH)'))
 
 import resource_rc
 

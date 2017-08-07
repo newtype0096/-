@@ -215,6 +215,13 @@ class Ui_Dialog(object):
         silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="17" height="17">'
         bronze_trophy = '<img id="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" src="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" width="17" height="17">'
         hidden_trophy = '<img id="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" src="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" width="17" height="17">'
+
+        division_platinum_trophy = '<img id="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" src="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" width="15" height="15">'
+        division_gold_trophy = '<img id="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" src="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" width="15" height="15">'
+        division_silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="15" height="15">'
+        division_bronze_trophy = '<img id="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" src="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" width="15" height="15">'
+        division_hidden_trophy = '<img id="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" src="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" width="15" height="15">'
+
         space = '&nbsp;'
 
         try:
@@ -227,40 +234,59 @@ class Ui_Dialog(object):
             soup = BeautifulSoup(html, 'html.parser')
 
             # 게임 제목 # 성공
-            title_name = title_name = soup.find("span", "breadcrumb-arrow").next_sibling
+            title_name = soup.find("span", "breadcrumb-arrow").next_sibling
 
             # 총 트로피 갯수 # 성공
             all_trophy_count = 0  # 총 트로피 갯수 0 으로 초기화
+            division_trophy_count_list = []  # base, DLC 1, DLC 2, DLC 3 ...
 
             trophy_count = soup.find_all("span", "small-info floatr")
             for trophies in trophy_count:
                 aaa = int(trophies.b.get_text())  # 태그 별 트로피 갯수 비교 후 가장 큰 값을 총 트로피 갯수로 저장
+                division_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if all_trophy_count < aaa:
                     all_trophy_count = aaa
+
+            del division_trophy_count_list[-1]  # 총 트로피 개수 삭제
 
             # 개별 트로피 갯수 # 성공
             platinum_trophy_count = soup.find("li", "icon-sprite platinum").get_text()  # 플래티넘은 어차피 1개이기 때문에 상관없음 # 플래티넘 트로피 성공
 
             gold_trophy_count = 0  # 골드 트로피 갯수 0으로 초기화 # 골드 트로피 성공
+            division_gold_trophy_count_list = []  # base, DLC 1, DLC 2, DLC 3 ...
+
             gold = soup.find_all("li", "icon-sprite gold")
             for gold_trophies in gold:
                 aaa = int(gold_trophies.get_text())
+                division_gold_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if gold_trophy_count < aaa:
                     gold_trophy_count = aaa
 
+            del division_gold_trophy_count_list[-1]  # 총 골드 트로피 개수 삭제
+
             silver_trophy_count = 0  # 실버 트로피 갯수 0으로 초기화 # 실버 트로피 성공
+            division_silver_trophy_count_list = []  # base, DLC 1, DLC 2, DLC 3 ...
+
             silver = soup.find_all("li", "icon-sprite silver")
             for silver_trophies in silver:
                 aaa = int(silver_trophies.get_text())
+                division_silver_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if silver_trophy_count < aaa:
                     silver_trophy_count = aaa
 
+            del division_silver_trophy_count_list[-1]  # 총 실버 트로피 개수 삭제
+
             bronze_trophy_count = 0  # 브론즈 트로피 갯수 0으로 초기화 # 브론즈 트로피 성공
+            division_bronze_trophy_count_list = []  # base, DLC 1, DLC 2, DLC 3 ...
+
             bronze = soup.find_all("li", "icon-sprite bronze")
             for bronze_trophies in bronze:
                 aaa = int(bronze_trophies.get_text())
+                division_bronze_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if bronze_trophy_count < aaa:
                     bronze_trophy_count = aaa
+
+            del division_bronze_trophy_count_list[-1]  # 총 브론즈 트로피 개수 삭제
 
             hidden_trophy_count = 0  # 히든 트로피 갯수 0으로 초기화 # 히든 트로피 성공
 
@@ -272,8 +298,6 @@ class Ui_Dialog(object):
 
             hidden_name_list = []
 
-            hidden_count = 0
-
             for tag in hidden_trophy_table:
                 a = tag.find_all("a")
                 for text in a:
@@ -283,6 +307,24 @@ class Ui_Dialog(object):
             for match in hidden_name_list:
                 if match == 'Secret Trophy':  # 저장된 이름이 Secret Trophy면
                     hidden_trophy_count += 1  # 갯수 1씩 증가
+
+            # 디비전 별 숨겨진 트로피 검색
+            division_hidden_trophy_count_list = []
+            division_count = 0
+            count = 0
+
+            while division_count < len(division_trophy_count_list):
+                search_count = 0  # 디비전 별 검색 횟수 # 다음 디비전을 위해 초기화
+                hidden_search_count = 0  # 디비전 별 숨겨진 틀피 개수 # 다음 디비전을 위해 초기화
+                while search_count < division_trophy_count_list[division_count]:
+                    if hidden_name_list[count] == 'Secret Trophy':
+                        hidden_search_count += 1
+
+                    count += 1
+                    search_count += 1
+
+                division_count += 1
+                division_hidden_trophy_count_list.append(hidden_search_count)
 
             # 트로피 제목 트로피 내용 # 성공
             trophy_name_list = []
@@ -342,8 +384,14 @@ class Ui_Dialog(object):
             for tag in naver_tag_list:
                 naver_tag_img_list.append(str(tag))
 
-            trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
-            del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
+            # DLC 유무
+            no_dlc_game_count = all_trophy_count + 1
+            yes_dlc_game_count = len(naver_tag_list)
+
+            # trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
+            # del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
+
+            trophy_main_img = naver_tag_img_list[all_trophy_count]  # 리스트는 0번 부터 시작 # 마지막 트로피 다음에 있는 이미지
 
             trophy_info_tag = (
                 '<center>' + trophy_main_img + '<br><br>' +
@@ -358,36 +406,168 @@ class Ui_Dialog(object):
                 '<font color="#000000">' + hidden_trophy + space + str(hidden_trophy_count) + '</font>' +
                 '</b></span>' + '</center>' + '<br>'
             )
-            # 트로피 등급 확인 후 태그 선정
-            list_count = 0
-            trophy_tag = ''
-            while list_count < int(all_trophy_count):
-                grade = ''
-                hidden = ''
 
-                if grade_list[list_count] == 'Platinum':
-                    grade = platinum_trophy
-                elif grade_list[list_count] == 'Gold':
-                    grade = gold_trophy
-                elif grade_list[list_count] == 'Silver':
-                    grade = silver_trophy
-                elif grade_list[list_count] == 'Bronze':
-                    grade = bronze_trophy
+            # 디비전 별 트로피
+            if no_dlc_game_count < yes_dlc_game_count:
 
-                if hidden_name_list[list_count] == 'Secret Trophy':
-                    hidden = hidden_trophy
+                dlc_main_img = []  # base, DLC 1, DLC 2, DLC 3 ...
+                dlc_count = all_trophy_count + 1  # 트로피 개수와 메인 이미지 개수의 합
+                while dlc_count < yes_dlc_game_count:
+                    dlc_main_img.append(naver_tag_img_list[dlc_count])
+                    dlc_count += 1
 
-                trophy_tag += (
-                    '<span style="font-family: Verdana; font-size: 9pt;">' +
-                    naver_tag_img_list[list_count] + space +
-                    '<b>' + trophy_name_list[list_count] + '</b>' + space + grade + hidden + '<br>' +
-                    trophy_content_list[list_count] + '</span><br><br>'
+                # print(dlc_main_img)
+
+                division_name = []
+
+                division_name_span = soup.find_all("span", "title")
+                for tag in division_name_span:
+                    division_name.append(tag.get_text())
+
+                # print(division_name)
+
+
+                division_count = 0
+                i = 0
+
+                division_full_tag = []
+                division_trophy_full_tag = []
+
+                while division_count < len(division_trophy_count_list):
+                    division_tag = ''
+                    if division_name[division_count] == 'Base Game':
+                        division_tag += (
+                            '<center>' + dlc_main_img[division_count] + '<br>' +
+                            '<span style="font-family: Verdana; font-size: 11pt;"><b>' +
+                            division_name[division_count] + '<br><br>' +
+                            '<font color="#0075c8">' + division_platinum_trophy + space + str(
+                                platinum_trophy_count) + space + '</font>' +
+                            '<font color="#d1b274">' + division_gold_trophy + space + str(
+                                division_gold_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#acacac">' + division_silver_trophy + space + str(
+                                division_silver_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#951015">' + division_bronze_trophy + space + str(
+                                division_bronze_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#000000">' + division_hidden_trophy + space + str(
+                                division_hidden_trophy_count_list[division_count]) + '</font>' +
+                            '</span>' + '</b></center>' + '<br>'
+                        )
+                    else:
+                        division_tag += (
+                            '<center>' + dlc_main_img[division_count] + '<br>' +
+                            '<span style="font-family: Verdana; font-size: 11pt;"><b>' +
+                            'DLC Pack #' + str(division_count) + ': ' + division_name[division_count] + '<br>' +
+                            '(DLC Pack #' + str(division_count) + ': ' + division_name[
+                                division_count] + ')' + '<br><br>' +
+                            '<font color="#d1b274">' + division_gold_trophy + space + str(
+                                division_gold_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#acacac">' + division_silver_trophy + space + str(
+                                division_silver_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#951015">' + division_bronze_trophy + space + str(
+                                division_bronze_trophy_count_list[division_count]) + space + '</font>' +
+                            '<font color="#000000">' + division_hidden_trophy + space + str(
+                                division_hidden_trophy_count_list[division_count]) + '</font>' +
+                            '</span>' + '</b></center>' + '<br>'
+                        )
+                    division_full_tag.append(division_tag)
+
+                    # 트로피
+                    trophy_tag = ''
+                    search = 0
+
+                    while search < division_trophy_count_list[division_count]:
+                        grade = ''
+                        hidden = ''
+
+                        if grade_list[i] == 'Platinum':
+                            grade = platinum_trophy
+                        elif grade_list[i] == 'Gold':
+                            grade = gold_trophy
+                        elif grade_list[i] == 'Silver':
+                            grade = silver_trophy
+                        elif grade_list[i] == 'Bronze':
+                            grade = bronze_trophy
+
+                        if hidden_name_list[i] == 'Secret Trophy':
+                            hidden = hidden_trophy
+
+                        trophy_tag += (
+                            '<span style="font-family: Verdana; font-size: 9pt;">' +
+                            naver_tag_img_list[i] + space +
+                            '<b>' + trophy_name_list[i] + '</b>' + space + grade + hidden + '<br>' +
+                            trophy_content_list[i] + '</span><br><br>'
+                        )
+
+                        i += 1
+                        search += 1
+
+                    division_trophy_full_tag.append(trophy_tag)
+
+                    division_count += 1
+
+                # 테스트
+                # print(len(division_trophy_full_tag))
+
+                text = ''
+
+                for i in range(0, len(division_trophy_count_list)):
+                    text += division_full_tag[i] + division_trophy_full_tag[i]
+
+                # pyperclip.copy(trophy_info_tag + text)
+
+                full_tag = trophy_info_tag + text
+                clipboard = QApplication.clipboard()
+                clipboard.setText(full_tag)
+
+            else:
+                trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
+                del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
+
+                trophy_info_tag = (
+                    '<center>' + trophy_main_img + '<br><br>' +
+                    '<span style="font-family: Verdana; font-size: 14pt;"><b>' +
+                    '<font color="#000000">' + title_name + ' 트로피 리스트' + '<br>' +
+                    '(' + title_name + ')' + '</font></span><br>' +
+                    '<br><span style="font-family: Verdana; font-size: 14pt;">' +
+                    '<font color="#0075c8">' + platinum_trophy + space + str(
+                        platinum_trophy_count) + space + '</font>' +
+                    '<font color="#d1b274">' + gold_trophy + space + str(gold_trophy_count) + space + '</font>' +
+                    '<font color="#acacac">' + silver_trophy + space + str(silver_trophy_count) + space + '</font>' +
+                    '<font color="#951015">' + bronze_trophy + space + str(bronze_trophy_count) + space + '</font>' +
+                    '<font color="#000000">' + hidden_trophy + space + str(hidden_trophy_count) + '</font>' +
+                    '</b></span>' + '</center>' + '<br>'
                 )
-                list_count += 1
+                # 트로피 등급 확인 후 태그 선정
+                list_count = 0
+                trophy_tag = ''
+                while list_count < int(all_trophy_count):
+                    grade = ''
+                    hidden = ''
 
-            full_tag = trophy_info_tag + trophy_tag
-            clipboard = QApplication.clipboard()
-            clipboard.setText(full_tag)
+                    if grade_list[list_count] == 'Platinum':
+                        grade = platinum_trophy
+                    elif grade_list[list_count] == 'Gold':
+                        grade = gold_trophy
+                    elif grade_list[list_count] == 'Silver':
+                        grade = silver_trophy
+                    elif grade_list[list_count] == 'Bronze':
+                        grade = bronze_trophy
+
+                    if hidden_name_list[list_count] == 'Secret Trophy':
+                        hidden = hidden_trophy
+
+                    trophy_tag += (
+                        '<span style="font-family: Verdana; font-size: 9pt;">' +
+                        naver_tag_img_list[list_count] + space +
+                        '<b>' + trophy_name_list[list_count] + '</b>' + space + grade + hidden + '<br>' +
+                        trophy_content_list[list_count] + '</span><br><br>'
+                    )
+                    list_count += 1
+
+                full_tag = trophy_info_tag + trophy_tag
+                clipboard = QApplication.clipboard()
+                clipboard.setText(full_tag)
+                # pyperclip.copy(full_tag)
 
             self.plainTextEdit_NaverTag.setPlainText("변환이 완료되어 클립보드에 복사되었습니다.")
         except:
@@ -436,7 +616,7 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate('Dialog', '6. html 체크를 해제하고 "확인" 버튼을 눌러 글작성을 완료합니다.'))
         self.label_16.setText(_translate('Dialog', ''))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate('Dialog', '사용 방법'))
-        self.label_15.setText(_translate('Dialog', '1.0.5 | 앰아 (M-AHHH)'))
+        self.label_15.setText(_translate('Dialog', '1.0.6 | 앰아 (M-AHHH)'))
 
 import resource_rc
 

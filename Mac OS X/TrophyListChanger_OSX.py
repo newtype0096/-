@@ -152,8 +152,8 @@ class Ui_Dialog(object):
         self.verticalLayout.addWidget(self.label_15)
 
         # signal
-        self.pushButton_SaveImage.clicked.connect(self.pushButton_SaveImage_Clicked)
-        self.pushButton_html.clicked.connect(self.pushButton_html_Clicked)
+        self.pushButton_SaveImage.clicked.connect(self.pushButton_SaveImage_Clicked) # 이미지 저장 버튼 슬롯 연결
+        self.pushButton_html.clicked.connect(self.pushButton_html_Clicked) # html 변환 버튼 슬롯 연결
         #
 
         self.retranslateUi(Dialog)
@@ -164,14 +164,14 @@ class Ui_Dialog(object):
     def pushButton_SaveImage_Clicked(self):
         self.textBrowser.clear()
         self.dir_path = '' # 저장 경로
-        self.dir_path = str(QFileDialog.getExistingDirectory())
+        self.dir_path = str(QFileDialog.getExistingDirectory()) # 다이얼로그에서 선택한 경로 저장
 
-        if self.dir_path != '':
+        if self.dir_path != '': # 다이얼로그 취소시 '' 저장 # 다이얼로그 취소가 아니면
             try:
-                self.dir_path = self.dir_path + '/'
-                main_url = self.lineEdit_URL.text()
+                self.dir_path = self.dir_path + '/' # 파일 이름을 붙이기전 '/' 추가
+                main_url = self.lineEdit_URL.text() # 링크 입력창에 붙여넣은 URL 가져옴
 
-                req = requests.get(main_url)
+                req = requests.get(main_url) # 링크를 입력하지 않았거나 잘못된 링크 입력시 여기서 에러 발생
                 html = req.text
                 soup = BeautifulSoup(html, 'html.parser')
 
@@ -192,17 +192,17 @@ class Ui_Dialog(object):
                     img_tag = picture_tag.find_all("img")
                     for img in img_tag:
                         src = img.get("src")
-                        IsTrophy = True
-                        proc = multiprocessing.Process(target=self.Download_Image, args=(src, q, IsTrophy))
+                        IsTrophy = True # 트로피 이미지
+                        proc = multiprocessing.Process(target=self.Download_Image, args=(src, q, IsTrophy)) # 태그 수 만큼 프로세서 생성
                         proc.start() # 시작
 
                 IsTrophy = False # 트로피 메인 이미지
                 proc = multiprocessing.Process(target=self.Download_Image, args=(trophy_main_img, q, IsTrophy))
                 proc.start()  # 시작
 
-                qcount = len(trophy_img) + len(trophy_main_img_list)
+                qcount = len(trophy_img) + len(trophy_main_img_list) # 다운로드 받게 되는 링크 개수 총 합
 
-                for filename in range(qcount):
+                for filename in range(qcount): # 큐에 저장된 정보를 링크 개수 만큼 가져옴
                     filename = q.get()
                     self.textBrowser.append(filename + " 다운로드 완료")
 
@@ -210,12 +210,14 @@ class Ui_Dialog(object):
                 self.textBrowser.setText("올바른 링크를 입력해주세요.")
 
     def pushButton_html_Clicked(self):
+        # 트로피 메인 정보를 위한 태그 size 17px 17px
         platinum_trophy = '<img id="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" src="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" width="17" height="17">'
         gold_trophy = '<img id="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" src="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" width="17" height="17">'
         silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="17" height="17">'
         bronze_trophy = '<img id="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" src="http://cafefiles.naver.net/20111222_112/kazenonakae_1324553335738GqDMQ_png/trophy_bronze_kazenonakae.png" width="17" height="17">'
         hidden_trophy = '<img id="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" src="http://cafefiles.naver.net/20111222_286/kazenonakae_1324553373601atvu6_png/trophy_hidden7_kazenonakae.png" width="17" height="17">'
 
+        # DLC 메인 정보를 위한 태그 size 15px 15px
         division_platinum_trophy = '<img id="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" src="http://cafefiles.naver.net/20111222_198/kazenonakae_1324553334353FLhM7_png/platinum_kazenonakae.png" width="15" height="15">'
         division_gold_trophy = '<img id="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" src="http://cafefiles.naver.net/20111222_224/kazenonakae_1324553335909tYHyj_png/trophy_gold_kazenonakae.png" width="15" height="15">'
         division_silver_trophy = '<img id="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" src="http://cafefiles.naver.net/20111222_139/kazenonakae_1324553373393dyJXS_png/trophy_silver_kazenonakae.png" width="15" height="15">'
@@ -226,10 +228,10 @@ class Ui_Dialog(object):
 
         try:
 
-            main_url = self.lineEdit_URL_2.text() + '?lang=ko'
-            hidden_url = main_url + '&secret=hide'
+            main_url = self.lineEdit_URL_2.text() + '?lang=ko' # 한국어 검색을 위해 입력 링크에 자동으로 붙임
+            hidden_url = main_url + '&secret=hide' # 숨겨진 트로피 식별을 위해 입력 링크에 자동으로 붙임
 
-            req = requests.get(main_url)
+            req = requests.get(main_url) # 잘못된 링크를 입력하거나 빈칸일 시 여기서 에러 발생
             html = req.text
             soup = BeautifulSoup(html, 'html.parser')
 
@@ -245,7 +247,7 @@ class Ui_Dialog(object):
                 aaa = int(trophies.b.get_text())  # 태그 별 트로피 갯수 비교 후 가장 큰 값을 총 트로피 갯수로 저장
                 division_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if all_trophy_count < aaa:
-                    all_trophy_count = aaa
+                    all_trophy_count = aaa # 가져온 모든 수 중 가장 큰 값을 총 트로피 개수로 저장
 
             del division_trophy_count_list[-1]  # 총 트로피 개수 삭제
 
@@ -260,7 +262,7 @@ class Ui_Dialog(object):
                 aaa = int(gold_trophies.get_text())
                 division_gold_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if gold_trophy_count < aaa:
-                    gold_trophy_count = aaa
+                    gold_trophy_count = aaa # 가져온 모든 수 중 가장 큰 값을 총 골드 트로피 개수로 저장
 
             del division_gold_trophy_count_list[-1]  # 총 골드 트로피 개수 삭제
 
@@ -272,7 +274,7 @@ class Ui_Dialog(object):
                 aaa = int(silver_trophies.get_text())
                 division_silver_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if silver_trophy_count < aaa:
-                    silver_trophy_count = aaa
+                    silver_trophy_count = aaa # 가져온 모든 수 중 가장 큰 값을 총 실버 트로피 개수로 저장
 
             del division_silver_trophy_count_list[-1]  # 총 실버 트로피 개수 삭제
 
@@ -284,7 +286,7 @@ class Ui_Dialog(object):
                 aaa = int(bronze_trophies.get_text())
                 division_bronze_trophy_count_list.append(aaa)  # base, DLC 1, DLC 2, DLC3 ... 순서대로 저장
                 if bronze_trophy_count < aaa:
-                    bronze_trophy_count = aaa
+                    bronze_trophy_count = aaa # 가져온 모든 수 중 가장 큰 값을 총 브론즈 트로피 개수로 저장
 
             del division_bronze_trophy_count_list[-1]  # 총 브론즈 트로피 개수 삭제
 
@@ -296,40 +298,40 @@ class Ui_Dialog(object):
 
             hidden_trophy_table = hidden_soup.find_all("td", style="width: 100%;")
 
-            hidden_name_list = []
+            hidden_name_list = [] # 트로피 이름 저장
 
             for tag in hidden_trophy_table:
                 a = tag.find_all("a")
                 for text in a:
                     name = text.get_text()
-                    hidden_name_list.append(name)
+                    hidden_name_list.append(name) # "a" 링크에서 내용만 저장
 
             for match in hidden_name_list:
                 if match == 'Secret Trophy':  # 저장된 이름이 Secret Trophy면
                     hidden_trophy_count += 1  # 갯수 1씩 증가
 
             # 디비전 별 숨겨진 트로피 검색
-            division_hidden_trophy_count_list = []
-            division_count = 0
-            count = 0
+            division_hidden_trophy_count_list = [] # 각 디비전별 트로피 개수 리스트로 저장
+            division_count = 0 # 디비전 순서
+            count = 0 # 트로피 이름 저장 리스트 순서
 
-            while division_count < len(division_trophy_count_list):
+            while division_count < len(division_trophy_count_list): # 디비전 순서가 리스트의 길이보다 작으면 # Base, DLC 3개면 리스트의 길이는 4가 된다.
                 search_count = 0  # 디비전 별 검색 횟수 # 다음 디비전을 위해 초기화
                 hidden_search_count = 0  # 디비전 별 숨겨진 틀피 개수 # 다음 디비전을 위해 초기화
-                while search_count < division_trophy_count_list[division_count]:
-                    if hidden_name_list[count] == 'Secret Trophy':
-                        hidden_search_count += 1
+                while search_count < division_trophy_count_list[division_count]: # 디비전 별 트로피 개수만큼 검색
+                    if hidden_name_list[count] == 'Secret Trophy': # 그 중 트로피 이름이 Secret Trophy면
+                        hidden_search_count += 1 # 디비전 별 숨겨진 트로피 개수 증가
 
-                    count += 1
-                    search_count += 1
+                    count += 1 # 트로피 이름 저장 리스트 인덱스 증가
+                    search_count += 1 # 검색할 다음 트로피 인덱스 증가
 
-                division_count += 1
-                division_hidden_trophy_count_list.append(hidden_search_count)
+                division_count += 1 # 다음 디비전
+                division_hidden_trophy_count_list.append(hidden_search_count) # 해당 디비전에서 찾은 숨겨진 트로피 개수 리스트에 저장
 
             # 트로피 제목 트로피 내용 # 성공
-            trophy_name_list = []
-            trophy_content_list = []
-            platinum_content = ''
+            trophy_name_list = [] # 트로피 이름 저장
+            trophy_content_list = [] # 트로피 내용 저장
+            platinum_content = '' # 플래티넘 트로피 내용 # None 방지
 
             all_trophy_table = soup.find_all("td", style="width: 100%;")
 
@@ -337,23 +339,23 @@ class Ui_Dialog(object):
                 a = tag.find_all("a")
                 for text in a:
                     name = text.get_text()
-                    trophy_name_list.append(name)
+                    trophy_name_list.append(name) # 모든 트로피 내용 중 링크 태그 a에 있는 내용을 트로피 이름으로 저장
 
             # all_count = 0 # 사용 중지
-            find_platinum_content = 0
+            find_platinum_content = 0 # 플래티넘 내용 검색 횟수
 
             for tag in all_trophy_table:
                 text = tag.find_all("br")
                 for content in text:
-                    trophy_content_list.append(content.next_sibling)
+                    trophy_content_list.append(content.next_sibling) # 모든 트로피 내용 중 br 태그 다음에 있는 텍스트를 트로피 내용으로 저장
 
             for tag in all_trophy_table:  # 플래티넘 내용 가져오기
-                text = tag.stripped_strings
+                text = tag.stripped_strings # 트로피 테이블 중 텍스트 전부 가져옴 # 트로피 이름, 내용
                 for content in text:
-                    if find_platinum_content == 1:
-                        platinum_content = content
+                    if find_platinum_content == 1: # 인덱스 0은 플래티넘 트로피 제목. 인덱스 1이면
+                        platinum_content = content # 해당 내용 플래티넘 내용으로 저장
                         break  # 플래티넘 내용만 얻은 뒤 탈출
-                    find_platinum_content += 1
+                    find_platinum_content += 1 # 인덱스 증가
 
                     # if (all_count % 2) == 0: # 짝수는 이름, 홀수는 내용 판별
                     #     pass
@@ -363,30 +365,30 @@ class Ui_Dialog(object):
                     # all_count+=1 # 사용 중지
                 break  # 탈출
 
-            trophy_content_list[0] = platinum_content  # None 값을 플래티넘 내용으로 변경
+            trophy_content_list[0] = platinum_content  # 리스트 인덱스 0에 있는 None 값을 플래티넘 내용으로 변경
 
             # 트로피 등급 # 성공
-            grade_list = []
+            grade_list = [] # 트로피 등급 저장
             trophy_grade = soup.find_all("span", "separator left")
 
             for img_tag in trophy_grade:  # 트로피 등급
                 trophy = img_tag.find_all("img")
                 for grade in trophy:
-                    grade_list.append(grade.get("title"))
+                    grade_list.append(grade.get("title")) # 트로피 등급 제목 리스트에 저장 Platinum, Gold, Silver, Bronze
 
             # 네이버 태그
             naver_tag_list = []  # 네이버 태그 리스트
             naver_tag_img_list = []  # 이미지 태그 개별 저장
-            naver_tag = self.plainTextEdit_NaverTag.toPlainText()
+            naver_tag = self.plainTextEdit_NaverTag.toPlainText() # 사용자가 붙여넣은 태그 저장
 
             naver_tag_list = BeautifulSoup(naver_tag, 'html.parser').find_all("img")
 
             for tag in naver_tag_list:
-                naver_tag_img_list.append(str(tag))
+                naver_tag_img_list.append(str(tag)) # 이미지 태그 분리하여 리스트에 저장
 
             # DLC 유무
-            no_dlc_game_count = all_trophy_count + 1
-            yes_dlc_game_count = len(naver_tag_list)
+            no_dlc_game_count = all_trophy_count + 1 # DLC가 없는 단일 게임은 총 트로피 개수 + 메인 이미지 수
+            yes_dlc_game_count = len(naver_tag_list) # DLC가 있는 게임은 분리한 이미지 태그 수 # DLC 이미지 추가 시 NO DLC 개수를 넘어서기 때문에 자동판별
 
             # trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
             # del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
@@ -408,34 +410,33 @@ class Ui_Dialog(object):
             )
 
             # 디비전 별 트로피
-            if no_dlc_game_count < yes_dlc_game_count:
+            if no_dlc_game_count < yes_dlc_game_count: # Yes DLC 이미지 태그 개수가 No DLC 이미지 태그 개수 보다 크면 DLC가 있는 게임
 
                 dlc_main_img = []  # base, DLC 1, DLC 2, DLC 3 ...
-                dlc_count = all_trophy_count + 1  # 트로피 개수와 메인 이미지 개수의 합
+                dlc_count = all_trophy_count + 1  # 트로피 개수와 메인 이미지 개수의 합 인덱스 다음부터 DLC 메인 이미지 # ex) 총 트로피 15 + 메인 1 = 16 이므로 17부터 DLC 이미지
                 while dlc_count < yes_dlc_game_count:
-                    dlc_main_img.append(naver_tag_img_list[dlc_count])
+                    dlc_main_img.append(naver_tag_img_list[dlc_count]) # DLC 메인 이미지 저장
                     dlc_count += 1
 
                 # print(dlc_main_img)
 
-                division_name = []
+                division_name = [] # DLC 트로피 메인 제목
 
                 division_name_span = soup.find_all("span", "title")
                 for tag in division_name_span:
-                    division_name.append(tag.get_text())
+                    division_name.append(tag.get_text()) # DLC 트로피 메인 제목 저장
 
                 # print(division_name)
 
+                division_count = 0 # 디비전 순서 # 0 BaseGame, 1 DLC#1, 2 DLC#2 ...
+                i = 0 # 트로피 등급 리스트 인덱스
 
-                division_count = 0
-                i = 0
+                division_full_tag = [] # 디비전 별 메인 정보 저장 리스트
+                division_trophy_full_tag = [] # 디비전 별 트로피 저장 리스트
 
-                division_full_tag = []
-                division_trophy_full_tag = []
-
-                while division_count < len(division_trophy_count_list):
+                while division_count < len(division_trophy_count_list): # 디비전 순서 < 디비전 개수
                     division_tag = ''
-                    if division_name[division_count] == 'Base Game':
+                    if division_name[division_count] == 'Base Game': # 인덱스 0은 BaseGame으로 번역문이 필요 없음
                         division_tag += (
                             '<center>' + dlc_main_img[division_count] + '<br>' +
                             '<span style="font-family: Verdana; font-size: 11pt;"><b>' +
@@ -452,12 +453,12 @@ class Ui_Dialog(object):
                                 division_hidden_trophy_count_list[division_count]) + '</font>' +
                             '</span>' + '</b></center>' + '<br>'
                         )
-                    else:
+                    else: # BaseGame을 제외한 DLC# 메인 정보
                         division_tag += (
                             '<center>' + dlc_main_img[division_count] + '<br>' +
                             '<span style="font-family: Verdana; font-size: 11pt;"><b>' +
-                            'DLC Pack #' + str(division_count) + ': ' + division_name[division_count] + '<br>' +
-                            '(DLC Pack #' + str(division_count) + ': ' + division_name[
+                            'DLC Pack #' + str(division_count) + ': ' + division_name[division_count] + '<br>' + # DLC 제목 번역문 자리
+                            '(DLC Pack #' + str(division_count) + ': ' + division_name[ # DLC 제목 원문 자리
                                 division_count] + ')' + '<br><br>' +
                             '<font color="#d1b274">' + division_gold_trophy + space + str(
                                 division_gold_trophy_count_list[division_count]) + space + '</font>' +
@@ -469,55 +470,55 @@ class Ui_Dialog(object):
                                 division_hidden_trophy_count_list[division_count]) + '</font>' +
                             '</span>' + '</b></center>' + '<br>'
                         )
-                    division_full_tag.append(division_tag)
+                    division_full_tag.append(division_tag) # 변환된 디비전 태그 리스트에 순서대로 저장
 
                     # 트로피
                     trophy_tag = ''
-                    search = 0
+                    search = 0 # 트로피 검색 개수 # 다음 디비전 때는 0으로 초기화 필요
 
-                    while search < division_trophy_count_list[division_count]:
+                    while search < division_trophy_count_list[division_count]: # 트로피 검색 개수 < 리스트에 저장된 디비전 별 트로피 개수
                         grade = ''
                         hidden = ''
 
-                        if grade_list[i] == 'Platinum':
+                        if grade_list[i] == 'Platinum': # 리스트에 저장된 내용이 Platinum이면 등급에 Platinum 트로피 이미지 태그 저장
                             grade = platinum_trophy
-                        elif grade_list[i] == 'Gold':
+                        elif grade_list[i] == 'Gold': #
                             grade = gold_trophy
-                        elif grade_list[i] == 'Silver':
+                        elif grade_list[i] == 'Silver': #
                             grade = silver_trophy
-                        elif grade_list[i] == 'Bronze':
+                        elif grade_list[i] == 'Bronze': #
                             grade = bronze_trophy
 
-                        if hidden_name_list[i] == 'Secret Trophy':
+                        if hidden_name_list[i] == 'Secret Trophy': #리스트에 저장된 내용이 Secret Trophy이면 숨겨진 트로피 이미지 태그 저장
                             hidden = hidden_trophy
 
                         trophy_tag += (
                             '<span style="font-family: Verdana; font-size: 9pt;">' +
-                            naver_tag_img_list[i] + space +
-                            '<b>' + trophy_name_list[i] + '</b>' + space + grade + hidden + '<br>' +
-                            trophy_content_list[i] + '</span><br><br>'
+                            naver_tag_img_list[i] + space + # 트로피 순서에 맞는 이미지
+                            '<b>' + trophy_name_list[i] + '</b>' + space + grade + hidden + '<br>' + # 트로피 순서에 맞는 제목과 등급, 숨겨진 트로피
+                            trophy_content_list[i] + '</span><br><br>' # 트로피 순서에 맞는 내용
                         )
 
-                        i += 1
-                        search += 1
+                        i += 1 # 트로피 등급 리스트 인덱스 증가
+                        search += 1 # 다음 트로피 인덱스 증가
 
-                    division_trophy_full_tag.append(trophy_tag)
+                    division_trophy_full_tag.append(trophy_tag) # 해당 디비전의 모든 트로피 태그 저장
 
-                    division_count += 1
+                    division_count += 1 # 다음 디비전 인덱스 증가
 
                 # 테스트
                 # print(len(division_trophy_full_tag))
 
                 text = ''
 
-                for i in range(0, len(division_trophy_count_list)):
+                for i in range(0, len(division_trophy_count_list)): # 모든 디비전 별 메인 정보와 트로피 정보 합침
                     text += division_full_tag[i] + division_trophy_full_tag[i]
 
                 # pyperclip.copy(trophy_info_tag + text)
 
-                full_tag = trophy_info_tag + text
+                full_tag = trophy_info_tag + text # 전체 트로피 메인 정보와 위에서 합친 정보를 합침
                 clipboard = QApplication.clipboard()
-                clipboard.setText(full_tag)
+                clipboard.setText(full_tag) # 클립보드에 복사
 
             else:
                 trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
@@ -576,21 +577,21 @@ class Ui_Dialog(object):
 
     # function
     def set_Queue(self, q, filename):
-            q.put(filename)
+            q.put(filename) # 전달 받은 내용 큐에 저장
 
     def Download_Image(self, src, q, IsTrophy):
-        if IsTrophy:
+        if IsTrophy: # 트로피 이미지 태그면
             filename = src.split("/")[-1]
             r = requests.get(src)
-            with open(self.dir_path+filename, 'wb') as f:
+            with open(self.dir_path+filename, 'wb') as f: # 파일 저장
                 f.write(r.content)
-                self.set_Queue(q, filename)
-        else:
+                self.set_Queue(q, filename) # 저장한 파일이름 큐에 저장하기 위해 전달
+        else: # 트로피 메인 이미지 태그면
             filename = src.split("/")[-1]
             r = requests.get(src)
-            with open(self.dir_path + filename, 'wb') as f:
+            with open(self.dir_path + filename, 'wb') as f: # 파일 저장
                 f.write(r.content)
-                self.set_Queue(q, filename)
+                self.set_Queue(q, filename) # 저장한 파일이름 큐에 저장하기 위해 전달
     #
 
     def retranslateUi(self, Dialog):

@@ -341,13 +341,7 @@ class Ui_Dialog(object):
                     name = text.get_text()
                     trophy_name_list.append(name) # 모든 트로피 내용 중 링크 태그 a에 있는 내용을 트로피 이름으로 저장
 
-            # all_count = 0 # 사용 중지
             find_platinum_content = 0 # 플래티넘 내용 검색 횟수
-
-            for tag in all_trophy_table:
-                text = tag.find_all("br")
-                for content in text:
-                    trophy_content_list.append(content.next_sibling) # 모든 트로피 내용 중 br 태그 다음에 있는 텍스트를 트로피 내용으로 저장
 
             for tag in all_trophy_table:  # 플래티넘 내용 가져오기
                 text = tag.stripped_strings # 트로피 테이블 중 텍스트 전부 가져옴 # 트로피 이름, 내용
@@ -356,16 +350,30 @@ class Ui_Dialog(object):
                         platinum_content = content # 해당 내용 플래티넘 내용으로 저장
                         break  # 플래티넘 내용만 얻은 뒤 탈출
                     find_platinum_content += 1 # 인덱스 증가
-
-                    # if (all_count % 2) == 0: # 짝수는 이름, 홀수는 내용 판별
-                    #     pass
-                    #     # name_list.append(content) # 트로피 이름 # 사용 중지
-                    # else:
-                    #     content_list.append(content) # 트로피 내용 # 사용 중지
-                    # all_count+=1 # 사용 중지
                 break  # 탈출
 
-            trophy_content_list[0] = platinum_content  # 리스트 인덱스 0에 있는 None 값을 플래티넘 내용으로 변경
+            trophy_content_list.append(platinum_content)  # 리스트 인덱스 0에 있는 None 값을 플래티넘 내용으로 변경
+
+            for tag in all_trophy_table:
+                br = str(tag.find("br")) # 트로피 테이블 중 <br> 태그만 일단 먼저 가져옴 # DLC는 None임 # DLC 구별을 위함
+                if '<br/>' == br: # <br/> 이면
+                    text = tag.stripped_strings # 모든 텍스트 가져옴
+                    count = 0 # 가져온 텍스트 순서
+                    con = '' # 텍스트
+                    for content in text:
+                        if count == 0: # 0이면 트로피 제목
+                            pass # 패스
+                        else:
+                            con += content + ' ' # 0 아니면 트로피 내용
+
+                            if count >= 2: # 트로피 내용에 개행이 있을시 이전 내용 삭제
+                                del trophy_content_list[-1]
+
+                            trophy_content_list.append(con) # 트로피 내용 추가
+                        count += 1 # 다음 텍스트로 증가
+
+            if all_trophy_count < len(trophy_content_list): # 특정 게임에서 플래티넘 내용 까지 가져옴 # 총 트로피 갯수보다 하나 초과됨
+                del trophy_content_list[0] # 초과했을시 플래티넘 내용 삭제
 
             # 트로피 등급 # 성공
             grade_list = [] # 트로피 등급 저장
@@ -389,9 +397,6 @@ class Ui_Dialog(object):
             # DLC 유무
             no_dlc_game_count = all_trophy_count + 1 # DLC가 없는 단일 게임은 총 트로피 개수 + 메인 이미지 수
             yes_dlc_game_count = len(naver_tag_list) # DLC가 있는 게임은 분리한 이미지 태그 수 # DLC 이미지 추가 시 NO DLC 개수를 넘어서기 때문에 자동판별
-
-            # trophy_main_img = naver_tag_img_list[-1]  # 마지막에 있는 메인이미지 태그만 저장
-            # del naver_tag_img_list[-1]  # 메인이미지 태그 삭제
 
             trophy_main_img = naver_tag_img_list[all_trophy_count]  # 리스트는 0번 부터 시작 # 마지막 트로피 다음에 있는 이미지
 
@@ -617,7 +622,7 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate('Dialog', '6. html 체크를 해제하고 "확인" 버튼을 눌러 글작성을 완료합니다.'))
         self.label_16.setText(_translate('Dialog', ''))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate('Dialog', '사용 방법'))
-        self.label_15.setText(_translate('Dialog', '1.0.6 | 앰아 (M-AHHH)'))
+        self.label_15.setText(_translate('Dialog', '1.0.7 | 앰아 (M-AHHH)'))
 
 import resource_rc
 
